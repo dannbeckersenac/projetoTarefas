@@ -1,16 +1,15 @@
-# Repositório de itens do checklist.
-# No primeiro tempo da aula 6, só a tarefa foi para o banco: os itens continuam
-# numa lista em memória e somem quando o servidor reinicia. Vão para o MySQL depois do intervalo.
-itens = []
+# Repositório de itens do checklist. Aula 6 (slide 46): a lista itens = [] saiu,
+# e o item passou a morar na tabela itens_checklist.
+# Não existe mais listar_por_tarefa: o serviço lê tarefa.itens, pelo relationship.
+from modelos.item import ItemChecklist
 
 
-# Devolve só os itens da tarefa pedida.
-def listar_por_tarefa(tarefa_id: int):
-    return [item for item in itens if item["tarefa_id"] == tarefa_id]
-
-
-# Gera o id com len(lista) + 1 e guarda o item na lista.
-def salvar(item: dict):
-    item["id"] = len(itens) + 1
-    itens.append(item)
+# INSERT do item. O mesmo commit também grava a tarefa que a regra mudou,
+# porque a tarefa veio desta mesma sessão (pela tarefa_existente da rota).
+# Item e tarefa vão juntos para o banco, ou nenhum dos dois: isso é uma transação.
+def salvar(sessao, dados: dict):
+    item = ItemChecklist(**dados)
+    sessao.add(item)
+    sessao.commit()          # grava o item e a tarefa que a regra mudou
+    sessao.refresh(item)
     return item

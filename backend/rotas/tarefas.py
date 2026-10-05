@@ -1,7 +1,10 @@
 # Rotas de tarefas e dos itens do checklist. Aqui só entra HTTP: status, HTTPException e esquemas.
-# Na aula 6 (primeiro tempo) as rotas não mudaram: a troca para o banco ficou toda no repositório.
-from fastapi import APIRouter, Depends, HTTPException
+# Aula 6 (slides 37 e 38): toda rota que chega ao banco pede a sessão com
+# sessao=Depends(obter_sessao) e passa adiante: rota, serviço, repositório.
+# O FastAPI abre a sessão quando a requisição chega e fecha quando a resposta sai.
+from fastapi import APIRouter, Depends, HTTPException, Query
 
+from banco import obter_sessao
 from esquemas.item import ItemCriar, ItemSaida
 from esquemas.tarefa import TarefaCriar, TarefaSaida
 from servicos import item as servico_item
@@ -11,9 +14,11 @@ router = APIRouter(prefix="/tarefas", tags=["tarefas"])
 
 
 # Dependência da aula 4: toda rota com tarefa_id passa por aqui.
-# Devolve a tarefa (agora um objeto vindo do MySQL) ou levanta o 404.
-def tarefa_existente(tarefa_id: int):
-    tarefa = servico.buscar_por_id(tarefa_id)
+# Aula 6: ela também pede a sessão. Na mesma requisição, o FastAPI entrega a MESMA
+# sessão para a dependência e para a rota. Por isso, quando a regra muda a tarefa,
+# o commit do item sabe o que mudou.
+def tarefa_existente(tarefa_id: int, sessao=Depends(obter_sessao)):
+    tarefa = servico.buscar_por_id(sessao, tarefa_id)
     if tarefa is None:
         raise HTTPException(status_code=404, detail="Tarefa não encontrada")
     return tarefa
@@ -21,18 +26,25 @@ def tarefa_existente(tarefa_id: int):
 
 # Abre uma tarefa. 201 com a tarefa criada, já com o id que o banco gerou.
 @router.post("", response_model=TarefaSaida, status_code=201)
-def criar_tarefa(dados: TarefaCriar):
-    resultado = servico.criar(dados)
+def criar_tarefa(dados: TarefaCriar, sessao=Depends(obter_sessao)):
+    resultado = servico.criar(sessao, dados)
     # O serviço devolve texto quando recusa: solicitante inexistente vira 422.
     if isinstance(resultado, str):
         raise HTTPException(status_code=422, detail=resultado)
     return resultado
 
 
-# Lista as tarefas, com os filtros opcionais por situação e por solicitante.
+# Lista as tarefas, com os filtros opcionais e a página.
+# Query(default=1, ge=1): sem página na URL, vale 1; o ge (maior ou igual) é o mesmo
+# do Field, então pagina=0 volta 422 antes de chegar ao serviço.
 @router.get("", response_model=list[TarefaSaida])
-def listar_tarefas(situacao: str | None = None, solicitante_id: int | None = None):
-    return servico.listar(situacao, solicitante_id)
+def listar_tarefas(
+    situacao: str | None = None,
+    solicitante_id: int | None = None,
+    pagina: int = Query(default=1, ge=1),
+    sessao=Depends(obter_sessao),
+):
+    return servico.listar(sessao, situacao, solicitante_id, pagina)
 
 
 # Mostra uma tarefa. O Depends já resolveu o 404 antes de chegar aqui.
@@ -43,8 +55,8 @@ def ver_tarefa(tarefa=Depends(tarefa_existente)):
 
 # Lança um item no checklist. 409 quando a tarefa já está concluída.
 @router.post("/{tarefa_id}/itens", response_model=ItemSaida, status_code=201)
-def lancar_item(dados: ItemCriar, tarefa=Depends(tarefa_existente)):
-    resultado = servico_item.lancar(tarefa, dados)
+def lancar_item(dados: ItemCriar, tarefa=Depends(tarefa_existente), sessao=Depends(obter_sessao)):
+    resultado = servico_item.lancar(sessao, tarefa, dados)
     if isinstance(resultado, str):
         raise HTTPException(status_code=409, detail=resultado)
     return resultado
