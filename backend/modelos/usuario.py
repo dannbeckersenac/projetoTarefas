@@ -12,4 +12,4 @@ class Usuario(Base):
 
     id = Column(Integer, primary_key=True)
     nome = Column(String(100), nullable=False)
-    tipo = Column(String(20), nullable=False)   # "solicitante" ou "executor"
+    tipo = Column(String(20), nullable=False, default="solicitante")   # "solicitante" ou "executor"
