@@ -13,3 +13,6 @@ class Usuario(Base):
     id = Column(Integer, primary_key=True)
     nome = Column(String(100), nullable=False)
     tipo = Column(String(20), nullable=False, default="solicitante")   # "solicitante" ou "executor"
+    plano = Column(String(20), nullable=False, default="gratuito")  # "gratuito" ou "premium"
+    email = Column(String(100), nullable=False, unique=True)
+    senha = Column(String(255), nullable=False)

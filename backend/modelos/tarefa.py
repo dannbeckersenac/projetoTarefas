@@ -19,10 +19,10 @@ class Tarefa(Base):                                   # herda da Base: vira tabe
     situacao = Column(String(20), nullable=False)
     itens_feitos = Column(Integer, nullable=False)
     # FK do DER (slide 6): o banco só aceita o id de um usuário que existe.
-    # ATENÇÃO: se a tabela tarefas foi criada no primeiro tempo, sem esta FK, o
-    # create_all NÃO altera a tabela. O modelo muda e a tabela não acompanha:
-    # é o assunto da próxima aula. Não apague a tabela para resolver.
-    solicitante_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    # Aula 7 · passo 3 (slide 12): a tabela criada sem esta FK não muda com o
+    # create_all; quem leva a chave ao banco é a migration do Alembic (passo 4).
+    # Sem o name, o Alembic avisa que não sabe desfazer a chave.
+    solicitante_id = Column(Integer, ForeignKey("usuarios.id", name="fk_tarefa_solicitante"), nullable=False)
 
     # Slide 42: o atalho no Python para ler os itens com ponto (tarefa.itens).
     # Não cria coluna nenhuma: quem liga as tabelas é a ForeignKey em modelos/item.py.

@@ -1,13 +1,11 @@
-# Rotas de tarefas e dos itens do checklist. Aqui só entra HTTP: status, HTTPException e esquemas.
+# Rotas de tarefas. Aqui só entra HTTP: status, HTTPException e esquemas.
 # Aula 6 (slides 37 e 38): toda rota que chega ao banco pede a sessão com
 # sessao=Depends(obter_sessao) e passa adiante: rota, serviço, repositório.
 # O FastAPI abre a sessão quando a requisição chega e fecha quando a resposta sai.
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from banco import obter_sessao
-from esquemas.item import ItemCriar, ItemSaida
 from esquemas.tarefa import TarefaCriar, TarefaSaida
-from servicos import item as servico_item
 from servicos import tarefa as servico
 
 router = APIRouter(prefix="/tarefas", tags=["tarefas"])
@@ -51,18 +49,3 @@ def listar_tarefas(
 @router.get("/{tarefa_id}", response_model=TarefaSaida)
 def ver_tarefa(tarefa=Depends(tarefa_existente)):
     return tarefa
-
-
-# Lança um item no checklist. 409 quando a tarefa já está concluída.
-@router.post("/{tarefa_id}/itens", response_model=ItemSaida, status_code=201)
-def lancar_item(dados: ItemCriar, tarefa=Depends(tarefa_existente), sessao=Depends(obter_sessao)):
-    resultado = servico_item.lancar(sessao, tarefa, dados)
-    if isinstance(resultado, str):
-        raise HTTPException(status_code=409, detail=resultado)
-    return resultado
-
-
-# Lista os itens do checklist de uma tarefa.
-@router.get("/{tarefa_id}/itens", response_model=list[ItemSaida])
-def listar_itens(tarefa=Depends(tarefa_existente)):
-    return servico_item.listar(tarefa)

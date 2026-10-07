@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from configuracao import obter_configuracao
-from rotas import tarefas
+from rotas import itens, tarefas
 
 configuracao = obter_configuracao()
 
@@ -19,5 +19,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# include_router liga as rotas que moram em rotas/tarefas.py.
+# include_router liga as rotas que moram em rotas/tarefas.py e rotas/itens.py.
 app.include_router(tarefas.router)
+app.include_router(itens.router)
