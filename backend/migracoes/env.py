@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from banco import Base, engine
-from modelos import usuario, tarefa, item
+from modelos import grupo, usuario, tarefa, item  # Aula 10 · grupos: grupo entra para o Alembic enxergar as tabelas novas
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

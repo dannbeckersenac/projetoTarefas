@@ -27,4 +27,5 @@ def obter_configuracao():
         "origem_frontend": os.getenv("ORIGEM_FRONTEND", ""),
         # Aula 6: o endereço do banco, que o banco.py usa para criar o engine.
         "url_do_banco": url_do_banco,
+        "chave_do_token": os.getenv("CHAVE_DO_TOKEN"),
     }

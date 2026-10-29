@@ -1,0 +1,43 @@
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.cartao {
+  max-width: 480px;
+  margin: 48px auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.1);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+input,
+button {
+  font: inherit;
+  padding: 8px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.erro {
+  color: #b91c1c;
+}

@@ -1,16 +1,39 @@
-# Repositório de usuários: lista fixa, sem rota de cadastro (definido na cartilha).
-# Aula 6: a tabela usuarios existe no MySQL só para a ForeignKey da tarefa.
-# A API continua consultando esta lista, por isso os ids daqui e da tabela precisam bater.
-usuarios = [
-    {"id": 1, "nome": "Júlia", "tipo": "solicitante"},
-    {"id": 2, "nome": "Marcos", "tipo": "executor"},
-    {"id": 3, "nome": "Paulo", "tipo": "solicitante"},
-]
+# Repositório de usuários. A lista fixa saiu: agora os usuários moram na tabela usuarios.
+#
+# Antes:
+#     usuarios = [
+#         {"id": 1, "nome": "Júlia", "tipo": "solicitante"},
+#         ...
+#     ]
+#
+# Como no repositório de tarefas, a sessão chega pronta, como primeiro parâmetro,
+# e as funções devolvem objetos Usuario, não dicionários.
+from sqlalchemy import select
+
+from modelos.usuario import Usuario
 
 
-# Procura o usuário pelo id. Devolve None quando não existe, e quem decide o erro é a rota.
-def buscar_por_id(usuario_id: int):
-    for usuario in usuarios:
-        if usuario["id"] == usuario_id:
-            return usuario
-    return None
+# SELECT de todos os usuários, em ordem de nome.
+def listar(sessao):
+    consulta = select(Usuario).order_by(Usuario.nome)
+    return sessao.scalars(consulta).all()
+
+
+# SELECT de um usuário pela chave primária. Devolve None se não existir.
+def buscar_por_id(sessao, usuario_id: int):
+    return sessao.get(Usuario, usuario_id)
+
+
+# SELECT de um usuário pelo e-mail. Devolve None se não existir.
+def buscar_por_email(sessao, email: str):
+    consulta = select(Usuario).where(Usuario.email == email)
+    return sessao.scalars(consulta).first()
+
+
+# INSERT de um usuário novo.
+def salvar(sessao, dados: dict):
+    usuario = Usuario(**dados)    # o dicionário vira objeto
+    sessao.add(usuario)
+    sessao.commit()               # o INSERT acontece aqui
+    sessao.refresh(usuario)       # traz de volta o id gerado pelo AUTO_INCREMENT
+    return usuario

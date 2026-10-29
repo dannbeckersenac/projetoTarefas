@@ -5,11 +5,11 @@ from pydantic import BaseModel, Field
 
 
 # Entrada do POST /tarefas. Sem id, situacao e itens_feitos: quem define é o serviço.
+# Aula 9: sem solicitante_id também. O dono vem do token, não do corpo.
 class TarefaCriar(BaseModel):
     titulo: str = Field(min_length=3, max_length=100)  # os mesmos tamanhos das colunas no banco
     descricao: str = Field(max_length=500)
     prazo: date                                        # o Pydantic exige o formato AAAA-MM-DD
-    solicitante_id: int
 
 
 # Saída das rotas. Aula 6: o que sai do repositório agora é um objeto Tarefa
