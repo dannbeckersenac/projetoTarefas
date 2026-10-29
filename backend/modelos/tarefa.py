@@ -1,7 +1,7 @@
 # Aula 6 · A tabela, em Python (slide 22).
 # ORM: classe vira tabela, atributo vira coluna, objeto vira linha.
 # Modelo não é esquema: o esquema (esquemas/) confere o que chega na requisição;
-# o modelo (modelos/) é a tabela no MySQL.
+# o modelo (modelos/) é a tabela no PostgreSQL.
 from sqlalchemy import Column, Date, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
@@ -10,9 +10,9 @@ from modelos.usuario import Usuario  # o modelo com ForeignKey importa o modelo 
 
 
 class Tarefa(Base):                                   # herda da Base: vira tabela
-    __tablename__ = "tarefas"                         # o nome da tabela no MySQL
+    __tablename__ = "tarefas"                         # o nome da tabela no PostgreSQL
 
-    id = Column(Integer, primary_key=True)            # INT PRIMARY KEY AUTO_INCREMENT: o banco numera sozinho
+    id = Column(Integer, primary_key=True)            # SERIAL PRIMARY KEY: o banco numera sozinho
     titulo = Column(String(100), nullable=False)      # VARCHAR(100) NOT NULL, o mesmo tamanho do Field
     descricao = Column(String(500), nullable=False)
     prazo = Column(Date, nullable=False)              # DATE NOT NULL: só o dia, sem hora

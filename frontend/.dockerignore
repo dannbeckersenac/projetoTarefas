@@ -1,0 +1,9 @@
+# O que NÃO entra no contexto do build da tela.
+
+# As dependências são instaladas pelo npm ci dentro do contêiner, no Linux.
+# A pasta do Windows é pesada e pode ter binários que não servem lá.
+node_modules/
+
+# O dist/ é gerado pelo npm run build dentro do contêiner. Um dist/ antigo da
+# minha máquina não pode se misturar com o novo.
+dist/

@@ -1,0 +1,14 @@
+# O que NÃO entra na imagem da API: o COPY . . do Dockerfile ignora estes caminhos.
+
+# O venv é do Windows: tem .exe e bibliotecas compiladas para Windows, que não rodam
+# no Linux do contêiner. Lá dentro, as dependências vêm do pip install do Dockerfile.
+venv/
+
+# O .env tem senha e chave. Segredo não vai para dentro da imagem: no contêiner,
+# os valores chegam pelo environment do docker-compose.yml.
+.env
+
+# Cache do Python, gerado sozinho. A primeira linha pega o da raiz do backend;
+# a segunda pega o das subpastas (rotas/, servicos/...), que a primeira não alcança.
+__pycache__/
+**/__pycache__/

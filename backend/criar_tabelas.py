@@ -1,6 +1,6 @@
 # Aula 6 · A tabela nasce do modelo (slides 23 e 43).
 # Rode à mão, na pasta backend/: python criar_tabelas.py
-# Substitui o CREATE TABLE escrito à mão no MySQL.
+# Substitui o CREATE TABLE escrito à mão no PostgreSQL.
 from banco import Base, engine
 
 # Um import por modelo: o import apresenta o modelo para a Base.
@@ -15,7 +15,7 @@ Base.metadata.create_all(engine)
 
 print("Tabelas:", list(Base.metadata.tables))
 
-# Depois de rodar, cadastre no MySQL os usuários da lista fixa, na mesma ordem,
+# Depois de rodar, cadastre no PostgreSQL os usuários da lista fixa, na mesma ordem,
 # para os ids baterem com repositorios/usuario.py (e a FK da tarefa aceitar):
 # Aula 10 · grupos: o tipo virou grupo_id (1 = solicitante, 2 = executor). Antes:
 #   INSERT INTO usuarios (nome, tipo) VALUES ('Júlia', 'solicitante'), ...
@@ -23,4 +23,4 @@ print("Tabelas:", list(Base.metadata.tables))
 # permissões vêm da migration criado_grupos_e_permissoes ("alembic upgrade head").
 #   INSERT INTO usuarios (nome, grupo_id, email, senha) VALUES
 #     ('Júlia', 1, ...), ('Marcos', 2, ...), ('Paulo', 1, ...);
-# Confira a ligação com: SHOW CREATE TABLE itens_checklist;  (aparece FOREIGN KEY)
+# Confira a ligação no psql com: \d itens_checklist  (aparece FOREIGN KEY)

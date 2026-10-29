@@ -109,7 +109,7 @@ def downgrade() -> None:
     op.execute("UPDATE usuarios SET tipo = 'executor' WHERE grupo_id = 2")
     op.alter_column('usuarios', 'tipo', existing_type=sa.String(length=20), nullable=False)
 
-    # Aula 10 · grupos: 2. No MySQL, a FK sai antes da coluna que ela usa.
+    # Aula 10 · grupos: 2. A FK sai antes da coluna que ela usa.
     op.drop_constraint('fk_usuario_grupo', 'usuarios', type_='foreignkey')
     op.drop_column('usuarios', 'grupo_id')
 

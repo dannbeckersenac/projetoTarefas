@@ -1,0 +1,63 @@
+# Três contêineres na rede padrão do Compose. Nessa rede, cada serviço é encontrado
+# pelo nome: a API chega ao banco em banco:5432, e o Caddy chega à API em api:8000.
+# Os ${...} são lidos do arquivo .env da raiz, ao lado deste arquivo e fora do Git.
+services:
+
+  # O PostgreSQL, a mesma versão 17 do banco do Supabase.
+  banco:
+    # Imagem oficial do Docker Hub, versão 17.
+    image: postgres:17
+    environment:
+      # Na primeira partida, com o volume vazio, a imagem cria este banco.
+      # O nome é o mesmo que o projeto já usava (tarefa_certa).
+      POSTGRES_DB: tarefa_certa
+      # E cria este usuário, dono do banco acima. A API entra com ele.
+      # No PostgreSQL não existe root separado: a senha abaixo é a única obrigatória.
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${BANCO_SENHA}
+    volumes:
+      # Volume nomeado: os dados ficam fora do contêiner e sobrevivem a down, rebuild e restart.
+      # Só o "docker compose down -v" apagaria o volume.
+      # Volume novo, separado do dados_do_banco antigo (com os arquivos do MySQL),
+      # porque o PostgreSQL só inicia em uma pasta vazia ou já dele.
+      - dados_do_postgres:/var/lib/postgresql/data
+    # Sem ports, de propósito: a 5432 só existe na rede interna do Compose.
+    # Ninguém de fora chega ao banco, só a API.
+
+  # A API FastAPI, construída pelo backend/Dockerfile.
+  api:
+    build: ./backend
+    environment:
+      # As mesmas chaves que o configuracao.py lê com os.getenv. Os valores vêm daqui,
+      # e não de um .env copiado para dentro da imagem.
+      BANCO_USUARIO: app
+      BANCO_SENHA: ${BANCO_SENHA}
+      # O host é o nome do serviço do banco: na rede do Compose, "banco" vira o IP do contêiner dele.
+      BANCO_HOST: banco
+      # Entre aspas: no YAML, o valor de environment precisa ser texto.
+      BANCO_PORTA: "5432"
+      BANCO_NOME: tarefa_certa
+      CHAVE_DO_TOKEN: ${CHAVE_DO_TOKEN}
+      # Sem ORIGEM_FRONTEND: a tela e a API ficam na mesma origem (localhost:8080),
+      # então o navegador não aplica CORS, e o main.py não libera nenhuma outra origem.
+    # Sobe depois do banco. Só ordena a partida: não espera o PostgreSQL aceitar conexões.
+    depends_on:
+      - banco
+    # Sem ports: a 8000 só existe na rede interna. Quem chega à API é o Caddy.
+
+  # O Caddy com a tela pronta, construído pelo frontend/Dockerfile.
+  web:
+    build: ./frontend
+    ports:
+      # A única porta aberta para fora: localhost:8080 na máquina vai para a 80 do contêiner.
+      - "8080:80"
+    volumes:
+      # O Caddyfile da raiz substitui o padrão da imagem. Mudou o arquivo? Basta reiniciar o web.
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    # Sobe depois da API, porque encaminha o /api para ela.
+    depends_on:
+      - api
+
+# Declaração do volume nomeado usado pelo banco. O Docker cria na primeira vez e guarda depois.
+volumes:
+  dados_do_postgres:
